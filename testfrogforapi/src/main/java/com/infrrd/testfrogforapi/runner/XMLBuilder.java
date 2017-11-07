@@ -26,7 +26,7 @@ public class XMLBuilder {
     	    	
     	// Creating listener tag
     	List<String> listeners = new ArrayList<String>();
-    	listeners.add("com.kroakyhub.testfrog.customlistener.CustomITestListener");
+    	listeners.add("com.infrrd.testfrog.customlistener.CustomITestListener");
     	xmlSuite.setListeners(listeners);
     	
     	// Creating "test" tag
