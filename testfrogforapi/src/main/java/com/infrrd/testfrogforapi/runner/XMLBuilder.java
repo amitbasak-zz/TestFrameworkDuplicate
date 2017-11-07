@@ -26,12 +26,12 @@ public class XMLBuilder {
     	    	
     	// Creating listener tag
     	List<String> listeners = new ArrayList<String>();
-    	listeners.add("com.infrrd.testfrog.customlistener.CustomITestListener");
+    	listeners.add("com.infrrd.testfrogforapi.customlistener.CustomITestListener");
     	xmlSuite.setListeners(listeners);
     	
     	// Creating "test" tag
     	XmlTest xmlTest = new XmlTest(xmlSuite);
-    	xmlTest.setName("Sanity Tests");
+    	xmlTest.setName("API Tests");
     	
     	// Linking test to the suite
     	List<XmlSuite> suites = new ArrayList<XmlSuite>();

@@ -2,6 +2,8 @@ package com.infrrd.testfrogforapi.base;
 
 import static io.restassured.RestAssured.given;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,104 +19,115 @@ import com.relevantcodes.extentreports.ExtentTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
+public class BaseTest {
+	private String testClassPath = System.getProperty("user.dir");
+	private static ExtentReports report;
+	private static ExtentTest test;
+	private URL url;
+	protected String URI;
+	private String baseURI;
+	private String basePath;
+	protected Object POJOclass;
+	protected Map<String, Object> headerMap = new HashMap<String, Object>();
+	private Map<String, Object> queryParamMap = new HashMap<String, Object>();
+	private Object pojo;
+	protected String jsonFilePath;
 
-public class BaseTest
-{
-    private String testClassPath = System.getProperty( "user.dir" );
-    private static ExtentReports report;
-    private static ExtentTest test;
-    protected String baseURI;
-    protected String basePath;
-    protected String endPoint;
-    protected Map<String, Object> headerMap = new HashMap<String, Object>();
-    protected Map<String, Object> queryParamMap = new HashMap<String, Object>();
-    protected Map<String, Object> pathParamMap = new HashMap<String, Object>();
-    protected Object pojo;
-    protected String jsonFilePath;
-
-
-    public static ExtentReports getReport() {
+	public static ExtentReports getReport() {
 		return report;
 	}
-
 
 	public static ExtentTest getTest() {
 		return test;
 	}
 
-
 	protected static void setTest(ExtentTest test) {
 		BaseTest.test = test;
 	}
 
+	public void initializeReports() {
+		String reportPath = testClassPath + "/testfrogreport.html";
+		report = new ExtentReports(reportPath);
 
-	public void initializeReports()
-    {
-        String reportPath = testClassPath + "\\testfrogreport.html";
-        report = new ExtentReports( reportPath );
-      
-    }
+	}
 
+	private void uriCreator() {
+		try {
+			url = new URL(URI);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		baseURI = url.getProtocol() + "://" + url.getHost();
+		basePath = url.getPath().replaceAll("//", "/");
+		try {
 
-    public Response get()
-    {
-        RestAssured.baseURI = baseURI;
-        RestAssured.basePath = basePath;
-        Response response = given().headers( headerMap ).queryParams( queryParamMap ).pathParams( pathParamMap ).when()
-            .get( endPoint );
-        return response;
+			String[] queries = url.getQuery().split("&");
 
-    }
+			for (String query : queries) {
+				String[] split = query.split("=");
+				queryParamMap.put(split[0], split[1]);
+			}
 
+		} catch (NullPointerException e) {
 
-    @SuppressWarnings ( { "unchecked", "rawtypes" })
-    public Response post( Class c )
-    {
+		}
+		RestAssured.baseURI = baseURI;
+	}
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Response response = null;
-        try {
+	public Response get() {
+		uriCreator();
 
-            pojo = objectMapper.readValue( new File( testClassPath + jsonFilePath ), c );
-            RestAssured.baseURI = baseURI;
-            RestAssured.basePath = basePath;
-            response = given().headers( headerMap ).queryParams( queryParamMap ).pathParams( pathParamMap ).body( pojo ).when()
-                .post( endPoint );
+		Response response = given().headers(headerMap).queryParams(queryParamMap).when().get(basePath);
 
-        } catch ( JsonParseException e ) {
-            e.printStackTrace();
-        } catch ( JsonMappingException e ) {
-            e.printStackTrace();
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
+		return response;
 
-        return response;
-    }
+	}
 
+	@SuppressWarnings("unchecked")
+	public Response post() {
 
-    @SuppressWarnings ( { "unchecked", "rawtypes" })
-    public Response patch( Class c )
-    {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Response response = null;
-        try {
+		uriCreator();
 
-            pojo = objectMapper.readValue( new File( testClassPath + jsonFilePath ), c );
-            RestAssured.baseURI = baseURI;
-            RestAssured.basePath = basePath;
-            response = given().headers( headerMap ).queryParams( queryParamMap ).pathParams( pathParamMap ).body( pojo ).when()
-                .patch( endPoint );
+		ObjectMapper objectMapper = new ObjectMapper();
+		Response response = null;
+		try {
 
-        } catch ( JsonParseException e ) {
-            e.printStackTrace();
-        } catch ( JsonMappingException e ) {
-            e.printStackTrace();
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
+			pojo = objectMapper.readValue(new File(testClassPath + jsonFilePath), (Class<Object>) POJOclass);
+			RestAssured.baseURI = baseURI;
+			response = given().headers(headerMap).queryParams(queryParamMap).body(pojo).when().post(basePath);
 
-        return response;
-    }
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return response;
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public Response patch() {
+		uriCreator();
+		ObjectMapper objectMapper = new ObjectMapper();
+		Response response = null;
+		try {
+
+			pojo = objectMapper.readValue(new File(testClassPath + jsonFilePath), (Class<Object>) POJOclass);
+			RestAssured.baseURI = baseURI;
+			response = given().headers(headerMap).queryParams(queryParamMap).body(pojo).when().patch(basePath);
+
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return response;
+	}
 
 }
