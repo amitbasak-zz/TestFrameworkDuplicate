@@ -22,6 +22,7 @@ public class TestFrog {
 		filePath = environmentWriterMap.get("f");
 	}
 
+	@SuppressWarnings("unused")
 	public void run() {
 		List<XmlSuite> suites = XMLBuilder.build(filePath);
 		TestcaseResultWriter writer = new TestcaseResultWriter(filePath);
@@ -50,24 +51,35 @@ public class TestFrog {
 					System.out.println("Run field is missing");
 					System.exit(0);
 				}
+
 			} else if (entry.getKey().equals("i")) {
 				rowNum = helper.getRowNumber("Environment", "Variable", "include");
+				String value = entry.getValue();
 				if (rowNum > 0) {
-					helper.writeCellValue("Environment", rowNum, "Value", entry.getValue());
+					if (value.equalsIgnoreCase("NA")) {
+						helper.writeCellValue("Environment", rowNum, "Value", "");
+					} else {
+						helper.writeCellValue("Environment", rowNum, "Value", entry.getValue());
+					}
 				} else {
 					System.out.println("Include field is missing");
 					System.exit(0);
 				}
-				
+
 			} else if (entry.getKey().equals("e")) {
 				rowNum = helper.getRowNumber("Environment", "Variable", "exclude");
+				String value = entry.getValue();
 				if (rowNum > 0) {
-					helper.writeCellValue("Environment", rowNum, "Value", entry.getValue());
+					if (value.equalsIgnoreCase("NA")) {
+						helper.writeCellValue("Environment", rowNum, "Value", "");
+					} else {
+						helper.writeCellValue("Environment", rowNum, "Value", entry.getValue());
+					}
 				} else {
 					System.out.println("Exclude field is missing");
 					System.exit(0);
 				}
-				
+
 			}
 		}
 	}

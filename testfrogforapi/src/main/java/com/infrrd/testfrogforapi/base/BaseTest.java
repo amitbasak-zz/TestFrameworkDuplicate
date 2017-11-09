@@ -92,8 +92,8 @@ public class BaseTest {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Response response = null;
 		try {
-
-			pojo = objectMapper.readValue(new File(testClassPath + jsonFilePath), (Class<Object>) POJOclass);
+			String path = (testClassPath + jsonFilePath);
+			pojo = objectMapper.readValue(new File(path), (Class<Object>) POJOclass);
 			RestAssured.baseURI = baseURI;
 			response = given().headers(headerMap).queryParams(queryParamMap).body(pojo).when().post(basePath);
 
