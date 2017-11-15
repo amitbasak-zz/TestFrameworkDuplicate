@@ -37,7 +37,7 @@ public class CustomITestListener extends BaseTest implements ITestListener {
 
 		TestcaseResultWriter writer = new TestcaseResultWriter();
 		writer.writeResult(result, "Fail", "NA");
-		logging(result.getMethod().getDescription() + "-- Test failed\n","fail");
+		logging(result.getMethod().getDescription() + "-- Test failed due to "+ result.getThrowable().getMessage() +"\n","fail");
 		getReport().endTest(getTest());
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.infrrd.testfrogforapi.runner.TestEnvironmentReader;
 import com.infrrd.testfrogforapi.helper.ExcelHelper;
 
 public class TestcaseReader {
@@ -33,43 +34,46 @@ public class TestcaseReader {
 
 	}
 
-	private static boolean includeGroup(int rowNum){
+	private static boolean includeGroup(int rowNum) {
 		int flag = 0;
 		String includeAsString = TestEnvironmentReader.environmentConfigurationMap.get("Include");
-		if(!includeAsString.isEmpty()){
+		if (!includeAsString.isEmpty()) {
 			String[] includeAsArray = includeAsString.split(",");
-			for(String groupName : includeAsArray){
-				if(ExcelHelper.getCellData("Testcase", rowNum, "Group").toUpperCase().contains(groupName.trim().toUpperCase())){
+			for (String groupName : includeAsArray) {
+				if (ExcelHelper.getCellData("Testcase", rowNum, "Group").toUpperCase()
+						.contains(groupName.trim().toUpperCase())) {
 					flag = 1;
 					break;
 				}
 			}
-			if(flag == 1){
+			if (flag == 1) {
 				return true;
-			}else{
+			} else {
 				return false;
 			}
-		}else{
+		} else {
 			return true;
 		}
 	}
-	private static boolean excludeGroup(int rowNum){
+
+	private static boolean excludeGroup(int rowNum) {
 		int flag = 0;
 		String excludeAsString = TestEnvironmentReader.environmentConfigurationMap.get("Exclude");
-		if(!excludeAsString.isEmpty()){
+		if (!excludeAsString.isEmpty()) {
 			String[] excludeAsArray = excludeAsString.split(",");
-			for(String groupName : excludeAsArray){
-				if(ExcelHelper.getCellData("Testcase", rowNum, "Group").toUpperCase().contains(groupName.trim().toUpperCase())){
+			for (String groupName : excludeAsArray) {
+				if (ExcelHelper.getCellData("Testcase", rowNum, "Group").toUpperCase()
+						.contains(groupName.trim().toUpperCase())) {
 					flag = 1;
 					break;
 				}
 			}
-			if(flag == 1){
+			if (flag == 1) {
 				return true;
-			}else{
+			} else {
 				return false;
 			}
-		}else{
+		} else {
 			return false;
 		}
 	}
@@ -80,25 +84,33 @@ public class TestcaseReader {
 		Set<String> setOftestcaseClasspaths = ExcelHelper.getUniqueColumnItem(sheetName, "Testcase Classpath");
 		int rowCount = ExcelHelper.getRowCount(sheetName);
 		int counter = 0;
+		int classCounter = 0;
 		for (String testcaseClasspath : setOftestcaseClasspaths) {
+			counter = 0;
 			List<String> listOfMethods = new ArrayList<String>();
-			for (int rowNum = 1; rowNum <= rowCount; rowNum++) {
+			for (int rowNum = 2; rowNum <= rowCount; rowNum++) {
 				String tempTestcaseClasspath = ExcelHelper.getCellData(sheetName, rowNum, "Testcase Classpath");
 				if (tempTestcaseClasspath.equals(testcaseClasspath)) {
 					String methodName = ExcelHelper.getCellData(sheetName, rowNum, "Method name");
-					if(includeGroup(rowNum) && !excludeGroup(rowNum)){
+					if (includeGroup(rowNum) && !excludeGroup(rowNum)) {
 						listOfMethods.add(methodName);
 						counter++;
 					}
 				}
 			}
-			if (counter == 0) {
-				System.out.println("No test case found");
-				System.exit(0);
+
+			if (counter != 0) {
+				classCounter++;
+				TestcaseMap.put(testcaseClasspath, listOfMethods);
 			}
-			TestcaseMap.put(testcaseClasspath, listOfMethods);
+
 		}
-		System.out.println("Running all test cases");
+		if(classCounter == 0){
+			System.out.println("No test case found");
+			System.exit(0);
+		}
+		System.out.println(
+				"Running all test cases [" + TestEnvironmentReader.environmentConfigurationMap.get("Include") + "]");
 	}
 
 	private static void selectRun() {
@@ -107,7 +119,9 @@ public class TestcaseReader {
 		Set<String> setOftestcaseClasspaths = ExcelHelper.getUniqueColumnItem(sheetName, "Testcase Classpath");
 		int rowCount = ExcelHelper.getRowCount(sheetName);
 		int counter = 0;
+		int classCounter=0;
 		for (String testcaseClasspath : setOftestcaseClasspaths) {
+			counter = 0;
 			List<String> listOfMethods = new ArrayList<String>();
 			for (int rowNum = 1; rowNum <= rowCount; rowNum++) {
 				String tempTestcaseClasspath = ExcelHelper.getCellData(sheetName, rowNum, "Testcase Classpath");
@@ -115,20 +129,25 @@ public class TestcaseReader {
 					String methodName = ExcelHelper.getCellData(sheetName, rowNum, "Method name");
 					String run = ExcelHelper.getCellData(sheetName, rowNum, "Run");
 					if (run.equalsIgnoreCase("Y")) {
-						if(includeGroup(rowNum) && !excludeGroup(rowNum)){
+						if (includeGroup(rowNum) && !excludeGroup(rowNum)) {
 							listOfMethods.add(methodName);
 							counter++;
 						}
 					}
 				}
 			}
-			if (counter == 0) {
-				System.out.println("No test case found");
-				System.exit(0);
+			if (counter != 0) {
+				classCounter++;
+				TestcaseMap.put(testcaseClasspath, listOfMethods);
 			}
-			TestcaseMap.put(testcaseClasspath, listOfMethods);
+
 		}
-		System.out.println("Running selected test cases");
+		if(classCounter == 0){
+			System.out.println("No test case found");
+			System.exit(0);
+		}
+		System.out.println("Running selected test cases ["
+				+ TestEnvironmentReader.environmentConfigurationMap.get("Include") + "]");
 	}
 
 	private static void statusRun(String status) {
@@ -137,7 +156,9 @@ public class TestcaseReader {
 		Set<String> setOftestcaseClasspaths = ExcelHelper.getUniqueColumnItem(sheetName, "Testcase Classpath");
 		int rowCount = ExcelHelper.getRowCount(sheetName);
 		int counter = 0;
+		int classCounter=0;
 		for (String testcaseClasspath : setOftestcaseClasspaths) {
+			counter = 0;
 			List<String> listOfMethods = new ArrayList<String>();
 			for (int rowNum = 1; rowNum <= rowCount; rowNum++) {
 				String tempTestcaseClasspath = ExcelHelper.getCellData(sheetName, rowNum, "Testcase Classpath");
@@ -145,20 +166,25 @@ public class TestcaseReader {
 					String methodName = ExcelHelper.getCellData(sheetName, rowNum, "Method name");
 					String run = ExcelHelper.getCellData(sheetName, rowNum, "Status");
 					if (run.equalsIgnoreCase(status)) {
-						if(includeGroup(rowNum) && !excludeGroup(rowNum)){
+						if (includeGroup(rowNum) && !excludeGroup(rowNum)) {
 							listOfMethods.add(methodName);
 							counter++;
 						}
 					}
 				}
 			}
-			if (counter == 0) {
-				System.out.println("No test case found");
-				System.exit(0);
+			if (counter != 0) {
+				classCounter++;
+				TestcaseMap.put(testcaseClasspath, listOfMethods);
 			}
-			TestcaseMap.put(testcaseClasspath, listOfMethods);
+
 		}
-		System.out.println("Running " + status + " test cases");
+		if(classCounter == 0){
+			System.out.println("No test case found");
+			System.exit(0);
+		}
+		System.out.println("Running " + status + " test cases ["
+				+ TestEnvironmentReader.environmentConfigurationMap.get("Include") + "]");
 	}
 
 }
